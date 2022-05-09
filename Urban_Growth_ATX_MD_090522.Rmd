@@ -30,9 +30,9 @@ knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
 
 This is a report to predict 2029 urban growth rate and patterns of Austin, TX.
 
-With the current upward rapid rise population and economic development rate, it is at most important to predict population increase in order to efficiently beforehand work towards planning allocation of resources, budgets and infrastructure. These predictions come very handy not only to planners, but also to residents, industries, economics locally but also outside of the region. These predictions not only help in planning urban growth abut also in prevention of urban growth.Urban growth is a spatial process which has a significant impact on the earth’s environment, which need to be tracked and predicted to not lead to urban sprawl into environmentally sensitive areas;  forests, wetlands, farmlands etc.
-For Planners, these predictions which can can be very useful to 
-Land use planning that is both economically productive and sustainable requires both supply and demand-side insights. Specifically, the Planner must understand future demand for development and how that demand contrasts with the supply of environmentally sensitive land. The goal of this chapter is to model this interplay.
+With the current upward rapid rise population and economic development rate, it is at most important to predict population increase in order to efficiently beforehand work towards planning allocation of resources, budgets and infrastructure.These predictions come very handy not only to planners, but also to residents, industries, economics locally but also outside of the region, above all a sustainable urban development. These predictions not only help in planning urban growth abut also in prevention of urban growth.Urban growth is a spatial process which has a significant impact on the earth’s environment, which need to be tracked and predicted to not lead to urban sprawl into environmentally sensitive areas;  forests, wetlands, farmlands etc.
+
+According to  Official Website of The City of Austin,TX is said be Forbes list of America's fasting growing cities, the third best city for good jobs, Third-fastest-growing tech job market along with being the most connected city, making it unquestionably attract people around the country, steady leading to rise in population growth. We are choosing this city as its already has seen a substantial growth but also will surely be a city that need to be explored as a priority given its current growth rates.
 
 ```{r load_packages, message=FALSE, warning=FALSE, results = "hide"}
 # install.packages("RCurl")
@@ -124,7 +124,8 @@ rast <- function(inRaster) {
 
 
 ## 2.2. Land Cover Change Data 
-weload in land cover change.
+
+We load in land cover change.
 Using raster recalculator for 2009 and 2019, reclassified all the cells as 0 and 1, where 0 is 'undeveloped' and 1 is 'developed'.
 
 
@@ -170,8 +171,8 @@ names(lc_change2) <- "lc_change"
 #   mapTheme
 ```
 
-we create a fishnet, which would be the surface we would be overlaying out various.
-Where each cell will have its own depended variable and predicted variable, and to aggregate them on each cell.
+we create a fishnet, which would be the surface we would be overlaying other variables..
+Where each cell will have its own depended variable and predicted variable, and aggregate them on each cell.
 ```{r, warning = FALSE, message = FALSE}
 austinMSA_fishnet <- 
   st_make_grid(st_sf(austinMSA), 4000) %>%
@@ -224,7 +225,7 @@ ggplot() +
   labs(title = "Land Cover Development Change", subtitle = "As fishnet centroids") +
   mapTheme
 ```
-Now we load in land cover for 2009, which is the base point of out analysis for predicting new development.
+Now we load in land cover for 2009, which is the base point of our analysis for predicting new development.
 
 ## 2.3. Land Cover in 2009
 
@@ -266,7 +267,7 @@ ggplot() +
   theme(legend.direction="horizontal")
 ```
 
-The table below shows the approach taken to recoded existing land cover codes into the categories used in our analysis. In the code block below new rasters are generated and `names` are applied. Naming ensures that when the raster is integrated with the fishnet, the column reflects the appropriate raster.
+The table below shows the approach taken to decoder existing land cover codes into the categories used in our analysis. In the code block below new rasters are generated and `names` are applied. Naming ensures that when the raster is integrated with the fishnet, the column reflects the appropriate raster.
 
 | Old_Classification             | New_Classification                                  |
 |--------------------------------|-----------------------------------------------------|
@@ -301,8 +302,6 @@ names(wetlands) <- "wetlands"
 names(otherUndeveloped) <- "otherUndeveloped"
 names(water) <- "water"
 ```
-
-
 
 ```{r, warning = FALSE, message = FALSE}
 aggregateRaster <- function(inputRasterList, theFishnet) {
@@ -389,8 +388,7 @@ AustinPop_19 <-
   rename(pop_2019 = B01003_001) %>%
   st_transform(st_crs(austinMSA_fishnet))
 ```
-Plotting both the population data sets for both 2009 and 2019, an interesting observation is few of the tracts in the highest population quintile breaks falls in the undeveloped quintile breaks of 2019. Which makes us wonder the possible reasons for it, either data collection issues or change in tracts or insufficient infrastructure to support growth, being few of the possible reasons.
-
+Plotting both the population data sets for both 2009 and 2019, an interesting observation is few of the tracts with the highest 2009 population quintile breaks falls in the undeveloped quintile breaks of 2019. Which makes us wonder the possible reasons for it.
 ```{r, warning = FALSE, message = FALSE, fig.height= 8, fig.width= 11}
 grid.arrange(
 ggplot() +
@@ -409,7 +407,8 @@ ggplot() +
   labs(title="Population, Houston MSA: 2019") +
   mapTheme, ncol=2)
 ```
-we bind population of 2009 and 2019 to fishnet, both of which have different geometric units. Using 'Area Weighted Interpolation' which is a technique used to estimate values for overlapping but different polygon features. In simple terms,Area Weighted Interpolation assigns a proportion of a tracts population to a grid cell weighted by the proportion of the tract that intersects the gird cell.
+we bind population of 2009 and 2019 to fishnet, both of which have different geometric units. Using 'Area Weighted Interpolation' which is a technique used to estimate values for overlapping but different polygon features. In simple terms,Area Weighted Interpolation assigns a proportion of a tracts population to a grid cell weighted by the proportion of the tract that intersects the fishnet grid cell.
+
 ```{r, warning = FALSE, message = FALSE}
 austinMSA_fishnet <-
   austinMSA_fishnet %>%
@@ -443,7 +442,7 @@ fishnetPopulation <-
   mutate(pop_Change = pop_2019 - pop_2009)
 ```
 
-The plot below show the population in tracts (left plot) and the poplation growth after its overlayed on the fishnet(right plot)
+The plot below show the population in tracts (left plot) and the population growth after its overlayed on the fishnet(right plot)
 
 ```{r, warning = FALSE, message = FALSE, fig.height = 8, fig.width= 11}
 grid.arrange(
@@ -465,14 +464,18 @@ ggplot() +
        subtitle="Represented as fishnet gridcells; Boundaries omitted") +
   mapTheme, ncol=2)
 ```
+
 We load in our next variable, highways.
+
 ```{r, warning = FALSE, message = FALSE, results = "hide"}
 austinHighways <-
   st_read("C:/Users/vhreddy/Desktop/Urban_Growth_ATX-main/Austin_Data/Austin_Highways.geojson") %>%
   st_transform(st_crs(austinMSA)) %>%
   st_intersection(austinMSA)
 ```
-A visulsation plot of highways on new development between 2009 and 2019.
+
+A visulsation plot of highways over new development between 2009 and 2019.
+
 ```{r plot_highway, warning = FALSE, message= FALSE}
 ggplot() +
   geom_point(data=fishnet, 
@@ -484,8 +487,10 @@ ggplot() +
        subtitle = "As fishnet centroids") +
   mapTheme
 ```
+
 The plot below shows Euclidean of each fishnet cell depending on their distance to the highway.
 Lightest to darkest colour, lightest colour being closest in distance to the highway meaning that these cells are highly likely to have development in them.
+
 
 ```{r, warning = FALSE, message = FALSE}
 
@@ -534,7 +539,7 @@ ggplot() +
 
 ## 2.6. The Spatial Lag of Development
 
-Here we take the nearest neighbour of a cell to the proximity to cell that is likely to have new development.
+Here using the nearest neighbor function we define if a cell would have new development or not depending on its proximity to a cell that had development. 
 
 ```{r, warning = FALSE, message = FALSE}
 nn_function <- function(measureFrom,measureTo,k) {
@@ -580,8 +585,8 @@ ggplot() +
 ```
 
 ## 2.7. MSA Counties
-We take the county boundires and join it to the fishnet
 
+We take the county boundries and join it to the fishnet.
 
 ```{r, warning = FALSE, message = FALSE, results = "hide"}
 options(tigris_class = "sf")
@@ -603,7 +608,7 @@ ggplot() +
 ```
 
 ## 2.8. Create the Final Dataset
-Finally, we aggreate all the fishnets created so far and all our variables (lc_change, developed, forest, farm, wetlands, otherUndeveloped, water,pop_2009, pop_2019, pop_Change, highway_dist,lagDevelopment) to create new column with developed and undeveloped for each cell.FInally we omit areas where there is water as dont want to predict development over water.
+Finally, we aggregate all the fishnets created so far and all our variables (lc_change, developed, forest, farm, wetlands, otherUndeveloped, water,pop_2009, pop_2019, pop_Change, highway_dist,lagDevelopment) to create new column with developed and undeveloped for each cell. Finally we omit areas where there is water as don't want to predict development over water.
 
 ```{r, warning = FALSE, message = FALSE}
 dat <- 
@@ -686,6 +691,7 @@ datTest  <- dat[-trainIndex,]
 nrow(dat)
 
 ```
+
 We now prototype our model depending on a combination of variables and their impact on land cover change per fishnet cell. For example, does a fishnet cell have forest (yes or not) and how does that impacted occurrence of new development.
 
 ```{r, warning = FALSE, message = FALSE}
